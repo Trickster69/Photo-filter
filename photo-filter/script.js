@@ -17,37 +17,37 @@ const ctx = canvas.getContext('2d');
 imgC.setAttribute('crossOrigin', 'anonymous'); 
 imgC.src = img.src;
 
-imgC.onload = function() {
-    // img.remove();
+imgC.onload = () => {    
     canvas.height = imgC.naturalHeight;
     canvas.width = imgC.naturalWidth;
     ctx.drawImage(imgC, 0, 0);
-  };
+};
 
 function setActiveBtn(e){
     allBtn.forEach(key=>{
-        key.classList.remove('btn-active')
+        key.classList.remove('btn-active');
     });
     e.currentTarget.classList.add('btn-active');
 }
 
   
-function change(e){
+function changePhoto(e){
     let arrChanges = [];
+
     controllers.forEach(key => {
         let name = key.querySelector('input').name;
         let value = key.querySelector('input').value;
         let size = key.querySelector('input').dataset.sizing;
         key.querySelector('output').value = value;
         
-        arrChanges.push(`${name}(${value}${size})`);
+        arrChanges.push(`${name}(${value}${size})`);        
         ctx.filter = arrChanges.join('');
         ctx.drawImage(imgC, 0, 0);
     });
     
 }
 
-function reset(e){
+function resetFilters(e){
     let arrReset = [];    
 
     controllers.forEach(key => {
@@ -62,7 +62,7 @@ function reset(e){
             key.querySelector('input').value = 0;
             key.querySelector('output').value = 0;
 
-            arrReset.push(`${key.querySelector('input').name}(${key.querySelector('input').value}${key.querySelector('input').dataset.sizing})`);            
+            arrReset.push(`${key.querySelector('input').name}(${key.querySelector('input').value}${key.querySelector('input').dataset.sizing})`);
             ctx.filter = arrReset.join('');
             ctx.drawImage(imgC, 0, 0);
         }
@@ -70,31 +70,22 @@ function reset(e){
     setActiveBtn(event);
 }
 
+function loadPhoto(){
+    const file = openPicBtn.files[0];
+    const reader = new FileReader();
+    reader.onload = () => {        
+        imgC.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+}
 
-controllers.forEach(key => key.addEventListener('input', ()=>{
-    change(event);
-}));
-resetBtn.addEventListener('click', ()=>{
-    reset(event);
+function nextPhoto(){
     setActiveBtn(event);
-});
-saveBtn.addEventListener('click', ()=>{
-    setActiveBtn(event);  
-    var link = document.createElement('a');
-    link.download = 'download.png';
-    link.href = canvas.toDataURL('image/jpeg');
-    link.click();      
-});
-
-
-
-nextPicBtn.addEventListener('click', ()=>{
-    setActiveBtn(event);
+    resetFilters(event);
     let now = new Date();
     let timeDay = '';
     let hours = now.getHours();
-    let minutes = now.getMinutes();
-    console.log(hours);
+    let minutes = now.getMinutes();    
     
     if((hours >= 6 && minutes >=0)&& (hours <=11 && minutes <= 59)){
         timeDay = 'morning';
@@ -105,35 +96,26 @@ nextPicBtn.addEventListener('click', ()=>{
     }else if((hours >= 0 && minutes >=0)&& (hours <=5 && minutes <= 59)){
         timeDay = 'night';
     }
-    console.log(timeDay);
+    console.log(`now ${timeDay} you can see photo #${b}`);
     imgC.src = `https://raw.githubusercontent.com/rolling-scopes-school/stage1-tasks/assets/images/${timeDay}/${b <= 9?`0${b}`:b}.jpg`;
-    console.log(b);
+    
     if(b>19){
         b=1;
     }else{
         b++;
     }
-    
-})
+}
 
-openPicBtn.addEventListener('change', (e)=> {
-    
-    const file = openPicBtn.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-        const img = new Image();
-        imgC.src = reader.result;
-        imgC.src.innerHTML = '';
-        imgC.src.append(img);
 
-    };
-    reader.readAsDataURL(file);
-});
-loadPicBtn.addEventListener('click', ()=>{
-    setActiveBtn(event);
-})
+function savePhoto(){
+    setActiveBtn(event);  
+    var link = document.createElement('a');
+    link.download = 'download.png';
+    link.href = canvas.toDataURL('image/jpeg');
+    link.click();    
+}
 
-fullScreenBtn.addEventListener('click', ()=>{
+function fullScreen(){
     if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen();
     } else {
@@ -141,5 +123,26 @@ fullScreenBtn.addEventListener('click', ()=>{
         document.exitFullscreen();
       }
     }
+}
+
+/***************    LISTENERS   ********************/
+
+controllers.forEach(key => key.addEventListener('input', ()=>{
+    changePhoto(event);
+}));
+resetBtn.addEventListener('click', ()=>{
+    resetFilters(event);
+    setActiveBtn(event);
 });
+saveBtn.addEventListener('click', savePhoto);
+
+nextPicBtn.addEventListener('click', nextPhoto);
+
+openPicBtn.addEventListener('change', loadPhoto);
+
+loadPicBtn.addEventListener('click', ()=>{
+    setActiveBtn(event);
+});
+
+fullScreenBtn.addEventListener('click', fullScreen);
 
