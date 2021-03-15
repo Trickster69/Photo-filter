@@ -133,7 +133,13 @@ loadPicBtn.addEventListener('click', ()=>{
     setActiveBtn(event);
 })
 
-fullScreenBtn.addEventListener('click',()=>{
-    
-})
+fullScreenBtn.addEventListener('click', ()=>{
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+});
 
